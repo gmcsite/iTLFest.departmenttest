@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>iTLFest.実行委員会部門適性診断</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Urbanist:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d0d0d;
+            --primary: red; 
+            --secondary: #2a2a2a;
+            --text-main: #ffffff;
+            --text-sub: #a0a0a0;
+            --font-jp: 'Noto Sans JP', sans-serif;
+            --font-en: 'Urbanist', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-jp);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 共通コンテナ */
+        .container {
+            width: 100%;
+            max-width: 500px; /* スマホサイズ最適化 */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-y: auto;
+            padding: 30px 20px;
+        }
+
+        /* 画面切り替え用のクラス */
+        .screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ----- スタート画面 ----- */
+        .start-screen {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .start-title {
+            font-family: var(--font-en);
+            font-size: 2.5rem;
+            line-height: 1.1;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+        .start-title span {
+            color: var(--primary);
+        }
+        .start-subtitle {
+            font-size: 1rem;
+            color: var(--text-sub);
+            margin-bottom: 40px;
+        }
+        .btn-primary {
+            background-color: var(--primary);
+            color: #000;
+            border: none;
+            border-radius: 30px;
+            padding: 18px 40px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-family: var(--font-jp);
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        .btn-primary:active {
+            transform: scale(0.95);
+        }
+
+        /* ----- 質問画面 ----- */
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: var(--secondary);
+            border-radius: 3px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .question-number {
+            font-family: var(--font-en);
+            color: var(--primary);
+            font-weight: 900;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .option-btn {
+            background-color: var(--secondary);
+            color: var(--text-main);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 20px;
+            font-size: 1rem;
+            text-align: left;
+            font-family: var(--font-jp);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            line-height: 1.4;
+        }
+        .option-btn:hover {
+            border-color: red(222, 255, 154, 0.5);
+        }
+        .option-btn:active {
+            background-color: var(--primary);
+            color: #000;
+            transform: scale(0.98);
+        }
+
+        /* ----- ローディング画面 ----- */
+        .loading-screen {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--secondary);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* ----- 結果画面 ----- */
+        .result-label {
+            font-size: 1rem;
+            color: var(--text-sub);
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        .result-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        .result-desc {
+            background-color: var(--secondary);
+            padding: 25px;
+            border-radius: 16px;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .message-box {
+            border-left: 4px solid var(--primary);
+            padding-left: 15px;
+            margin-bottom: 40px;
+        }
+        .message-box p {
+            margin: 0 0 10px 0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .message-sender {
+            font-weight: 700;
+            color: var(--text-sub);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- スタート画面 -->
+    <div id="screen-start" class="screen active start-screen">
+        <h1 class="start-title"><br><span>iTLFest.実行委員会</span> <br>部門診断</h1>
+        <p class="start-subtitle">10個の質問から、あなたの強みと<br>最も輝ける部門を導き出します。</p>
+        <button class="btn-primary" onclick="startTest()">診断をスタート</button>
+    </div>
+
+    <!-- 質問画面 -->
+    <div id="screen-question" class="screen">
+        <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+        </div>
+        <div id="q-number" class="question-number">Q1 / 10</div>
+        <div id="q-text" class="question-text">質問テキスト</div>
+        <div id="options" class="options">
+            <!-- 選択肢がここにJavaScriptで生成されます -->
+        </div>
+    </div>
+
+    <!-- ローディング画面 -->
+    <div id="screen-loading" class="screen loading-screen">
+        <div class="loader"></div>
+        <p style="font-weight: 700; letter-spacing: 2px;">ANALYZING...</p>
+    </div>
+
+    <!-- 結果画面 -->
+    <div id="screen-result" class="screen">
+        <div class="result-label">あなたにぴったりの部門は...</div>
+        <div id="r-title" class="result-title">部門名</div>
+        <div id="r-desc" class="result-desc">部門の説明</div>
+        
+        <div class="message-box">
+            <p>診断結果はいかがでしたか？<br>少しでも興味を持ったら、ぜひ入会フォームの回答をよろしくお願いします！ <a href="https://docs.google.com/forms/d/e/1FAIpQLSc8mMJ5b6MDiFSc3ae2OhRLUoWyYPfJL5bcBHpbt55lWFpGrQ/viewform?usp=dialog">入会アンケートはこちらから</a></p>
+            <div class="message-sender">iTLFest.実行委員会</div>
+        </div>
+
+        <button class="btn-primary" onclick="location.reload()">もう一度やり直す</button>
+    </div>
+</div>
+
+<script>
+    // --- 質問データ ---
+    // 属性: C(創造), L(論理), S(社交), H(貢献)
+    const questions = [
+        {
+            text: "チームで何かを成し遂げるとき、あなたが一番ワクワクするのは？",
+            options: [
+                { text: "誰も思いつかないような新しいアイデアを出すとき", attr: "C" },
+                { text: "計画通りに物事がスムーズに進み、完成したとき", attr: "L" },
+                { text: "多くの人と関わり、チームの輪が広がったとき", attr: "S" },
+                { text: "自分の行動が誰かの役に立ち、感謝されたとき", attr: "H" }
+            ]
+        },
+        {
+            text: "休日の過ごし方で、理想に近いものは？",
+            options: [
+                { text: "美術館や新しいイベントに行き、刺激を受ける", attr: "C" },
+                { text: "気になっていた技術を調べたり、部屋を整理整頓する", attr: "L" },
+                { text: "友達と集まってワイワイ楽しく過ごす", attr: "S" },
+                { text: "カフェでゆっくりしたり、誰かのために料理を作る", attr: "H" }
+            ]
+        },
+        {
+            text: "自分の強みをひとつ選ぶなら？",
+            options: [
+                { text: "ゼロから形にする独創的な発想力", attr: "C" },
+                { text: "筋道を立てて考える冷静な分析力", attr: "L" },
+                { text: "初対面の人とも打ち解けられるコミュニケーション力", attr: "S" },
+                { text: "周りの状況を見て動ける気配り力", attr: "H" }
+            ]
+        },
+        {
+            text: "予期せぬトラブルが発生！あなたの最初の行動は？",
+            options: [
+                { text: "「逆にチャンスかも」と新しい解決策をひらめく", attr: "C" },
+                { text: "原因を究明するため、マニュアルやデータを調べる", attr: "L" },
+                { text: "まずは周囲に声をかけ、みんなで協力して対処する", attr: "S" },
+                { text: "パニックになっている人をフォローし、場を落ち着かせる", attr: "H" }
+            ]
+        },
+        {
+            text: "スマホのホーム画面はどんな感じ？",
+            options: [
+                { text: "壁紙やアイコンの配置にこだわり、見た目がオシャレ", attr: "C" },
+                { text: "フォルダを活用し、機能的で効率的に整理されている", attr: "L" },
+                { text: "SNSや連絡ツールが一番アクセスしやすい場所にある", attr: "S" },
+                { text: "使いやすければOK。あまり強いこだわりはない", attr: "H" }
+            ]
+        },
+        {
+            text: "誰かを説得するとき、どうアプローチする？",
+            options: [
+                { text: "魅力的なビジュアルやストーリーで直感的に惹きつける", attr: "C" },
+                { text: "客観的なデータと論理的な根拠を順序立てて示す", attr: "L" },
+                { text: "熱意とトーク力で、相手の心を直接動かす", attr: "S" },
+                { text: "相手の要望を丁寧にヒアリングし、メリットを提示する", attr: "H" }
+            ]
+        },
+        {
+            text: "グループワークでのあなたのポジションは？",
+            options: [
+                { text: "積極的に意見を出すアイデアマン", attr: "C" },
+                { text: "進行を管理し、タスクを整理するタイムキーパー", attr: "L" },
+                { text: "意見を引き出し、場を盛り上げるムードメーカー", attr: "S" },
+                { text: "足りない部分を黙々と補う縁の下の力持ち", attr: "H" }
+            ]
+        },
+        {
+            text: "文化祭当日、一番いたい場所は？",
+            options: [
+                { text: "装飾やデザインが映える、クリエイティブな空間", attr: "C" },
+                { text: "全体を把握し、インカムで指示を出すコントロールセンター", attr: "L" },
+                { text: "外部ゲストや他団体と交流できる受付や応接室", attr: "S" },
+                { text: "笑顔が溢れ、直接お客さんと触れ合える販売ブース", attr: "H" }
+            ]
+        },
+        {
+            text: "将来、どんな社会人になりたい？",
+            options: [
+                { text: "新しい価値やサービスを世に生み出すイノベーター", attr: "C" },
+                { text: "専門的なスキルで課題をスマートに解決するプロ", attr: "L" },
+                { text: "多くの人を繋ぎ、大きなプロジェクトを牽引するリーダー", attr: "S" },
+                { text: "相手に寄り添い、確実な信頼を得るパートナー", attr: "H" }
+            ]
+        },
+        {
+            text: "最後に、iTLFest.で一番やってみたいことは？",
+            options: [
+                { text: "学園祭の目玉となるような大型企画をゼロから創る", attr: "C" },
+                { text: "ITツールを駆使して、誰もが驚くスムーズな運営を実現する", attr: "L" },
+                { text: "有名ゲストを呼んだり、企業を巻き込んで祭りを大きくする", attr: "S" },
+                { text: "美味しい食べ物や最高のサービスで、目の前の来場者を笑顔にする", attr: "H" }
+            ]
+        }
+    ];
+
+    // --- 部門データ ---
+    const departments = {
+        "企画部門": "0から1を創り出す、iTLFest.の心臓部。好奇心旺盛でアイデアに溢れるあなたには、新しい企画を立案し実行するこの部門がぴったりです！",
+        "広報部門": "デザインと戦略でiTLFest.を魅せるブランドデザイナー。あなたのクリエイティブなセンスと分析力を活かして、祭りの魅力を世界に発信しましょう！",
+        "食品販売部門": "食と笑顔を届ける究極のエンターテイナー。人を喜ばせたいというホスピタリティを持つあなた。当日の活気ある現場を一緒に作り上げましょう！",
+        "渉内外部門": "外の世界とiTLを繋ぐ、コミュニケーションのプロ。高い社交性を活かして、企業や他団体との架け橋となる重要な役割をお願いします！",
+        "ゲスト部門": "非日常を演出し、華やかなステージを作る仕掛人。トレンドに敏感で人を巻き込む力があるあなたには、目玉となるステージ企画が向いています！",
+        "総務部門": "組織の基盤を支え、ITを駆使するテクニカルバックボーン。論理的思考と正確な作業が得意なあなた。スマートな運営にはあなたの力が必要です！"
+    };
+
+    // --- 状態管理 ---
+    let currentQuestionIndex = 0;
+    let scores = { C: 0, L: 0, S: 0, H: 0 };
+
+    // --- 関数 ---
+    function switchScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    function startTest() {
+        currentQuestionIndex = 0;
+        scores = { C: 0, L: 0, S: 0, H: 0 };
+        renderQuestion();
+        switchScreen('screen-question');
+    }
+
+    function renderQuestion() {
+        const q = questions[currentQuestionIndex];
+        
+        // プログレスバーの更新
+        const progress = ((currentQuestionIndex) / questions.length) * 100;
+        document.getElementById('progress-fill').style.width = `${progress}%`;
+
+        // テキストの更新
+        document.getElementById('q-number').innerText = `Q${currentQuestionIndex + 1} / ${questions.length}`;
+        document.getElementById('q-text').innerText = q.text;
+
+        // 選択肢の生成
+        const optionsContainer = document.getElementById('options');
+        optionsContainer.innerHTML = '';
+        
+        q.options.forEach((opt) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt.text;
+            btn.onclick = () => handleAnswer(opt.attr);
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function handleAnswer(attr) {
+        scores[attr]++;
+        currentQuestionIndex++;
+
+        if (currentQuestionIndex < questions.length) {
+            renderQuestion();
+        } else {
+            document.getElementById('progress-fill').style.width = '100%';
+            showLoading();
+        }
+    }
+
+    function showLoading() {
+        switchScreen('screen-loading');
+        setTimeout(() => {
+            showResult();
+        }, 1500); // 1.5秒ローディング演出
+    }
+
+    function showResult() {
+        // スコアのソート
+        const sortedAttrs = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
+        const top1 = sortedAttrs[0];
+        const top2 = sortedAttrs[1];
+
+        let resultDept = "企画部門"; // デフォルト
+
+        // 判定ロジック
+        if (top1 === 'C') {
+            if (top2 === 'L') resultDept = '広報部門';
+            else resultDept = '企画部門';
+        } else if (top1 === 'L') {
+            if (top2 === 'C') resultDept = '広報部門';
+            else resultDept = '総務部門';
+        } else if (top1 === 'S') {
+            if (top2 === 'C' || top2 === 'L') resultDept = 'ゲスト部門';
+            else resultDept = '渉内外部門';
+        } else if (top1 === 'H') {
+            if (top2 === 'L') resultDept = '総務部門';
+            else resultDept = '食品販売部門';
+        }
+
+        document.getElementById('r-title').innerText = resultDept;
+        document.getElementById('r-desc').innerHTML = `<b>【あなたの強み】</b><br>${departments[resultDept]}`;
+
+        switchScreen('screen-result');
+    }
+</script>
+
+</body>
+</html>
